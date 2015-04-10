@@ -20,17 +20,18 @@
 // 4) GET RID OF MAGIC NUMBERS - make them constants
 //////////////////////////////////////////////////////////////
 
+// globals 
 const int speed = 40; 				// robot's default speed
-const int robotRightAngle = 180; 	// number for the robot to turn 90 degrees
+const int robotRightAngle = 180; 		// number for the robot to turn 90 degrees
 const int delay = 10;				// time to see if another bumper touches (milliseconds)
 const int volume = 50;				// default volume for robot sound
 const int maxPower = 35;			// the robot's max power 
 const int minPower = 25; 			// the robot's min power
-const int backupMinTime = 500;		// the min time the robot should back up (milliseconds)
-const int backupMaxTime = 1000; 	// the max time the robot should back up (milliseconds)
-const int maxTravelTime = 2500; 	// the max time the robot should move in 1 direction (milliseconds)
+const int backupMinTime = 500;			// the min time the robot should back up (milliseconds)
+const int backupMaxTime = 1000; 		// the max time the robot should back up (milliseconds)
+const int maxTravelTime = 2500; 		// the max time the robot should move in 1 direction (milliseconds)
 const int pauseTime = 2;			// number of seconds that the robot should pause when both sensors are touched
-bool respondingToTouch = false; 	// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
+bool respondingToTouch = false; 		// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
 
 /* thread that handles touch and collision behavior */
 task touchThread() {
