@@ -11,39 +11,34 @@
 * Authors: Cody Tedrick & Brandon Soto
 **************************************************************/
 
-///////////////////// TO DO ///////////////////////////////////
-// 1) fix both touched case
-// 		* almost finished
-// 2) make wandering algorithm more biased
-// 		* I've attempted a new algorithm. Check over it.
-//////////////////////////////////////////////////////////////
+///////////////////////////////////////////////globals//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+const unsigned int aDelay = 50;							// time to see if another bumper touches (milliseconds)
+const unsigned int volume = 40;							// default volume for robot sound
+const unsigned int maxPower = 40;						// the robot's max power
+const unsigned int minPower = 5; 						// the robot's min power
+const unsigned int powRange = maxPower - minPower; 		// the robot's power range
+const unsigned int backMinTime = 1000;					// the min time the robot can back up (milliseconds)
+const unsigned int backMaxTime = 2000; 					// the max time the robot can back up (milliseconds)
+const unsigned int forwardMinTime = 500;				// the min time the robot can go forward (milliseconds)
+const unsigned int forwardMaxTime = 4500; 				// the max time the robot can go forward (milliseconds)
+const unsigned int pauseTime = 2;						// number of seconds that the robot should pause after both sensors are touched
+const unsigned int bias = 4;							// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be.
+bool respondingToTouch = false; 						// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
+const unsigned int forwardTimeRange = forwardMaxTime - forwardMinTime; 		// time range the robot goes forward
+const unsigned int backTimeRange = backMaxTime - backMinTime; 				// time range the robot goes backward
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// globals
-const unsigned int speed = 50; 								// robot's default speed
-const unsigned int thedelay = 10;							// time to see if another bumper touches (milliseconds)
-const unsigned int volume = 50;								// default volume for robot sound
-const unsigned int maxPower = 50;							// the robot's max power
-const unsigned int minPower = 20; 						// the robot's min power
-const unsigned int backupMinTime = 500;				// the min time the robot should back up (milliseconds)
-const unsigned int backupMaxTime = 2000; 			// the max time the robot should back up (milliseconds)
-const unsigned int maxTravelTime = 3000; 			// the max time the robot should move in 1 direction (milliseconds)
-const unsigned int pauseTime = 2;							// number of seconds that the robot should pause when both sensors are touched
-const unsigned int bias = 3;									// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be. (should be between 1 - 5)
-bool respondingToTouch = false; 							// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
+// ////////////////////////////////////Function definitions ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-// returns a random power number within the robot's power range
+/* returns a random power number within the robot's power range */
 unsigned int getRandomPower() {
-	const int powerRange = maxPower - minPower;	// the robot's power range
-	return random(powerRange) + minPower;
+	return random(powRange) + minPower;
 }
 
-// returns a larger biassed number within the robot's power range
+/* returns a larger biassed number within the robot's power range */
 unsigned int getMaxBias() {
-	unsigned int turnPower = minPower;
-	int i;
+	unsigned int turnPower = minPower, i;
 
-	// finds the max random power
 	for (i = 0; i < bias; i++) {
 		unsigned int randPower = getRandomPower();
 		if (randPower > turnPower) {
@@ -54,13 +49,11 @@ unsigned int getMaxBias() {
 	return turnPower;
 }
 
-// returns a smaller biassed number within the robot's power range
+/* returns a smaller biassed number within the robot's power range */
 unsigned int getMinBias() {
-	unsigned int turnPower = maxPower;
-	int i;
+	unsigned int turnPower = maxPower, i;
 
-	// finds the max random power
-	for (i = 0; i < bias; i++) {
+	for (i = 0; i < (int) (bias / 2); i++) {
 		unsigned int randPower = getRandomPower();
 		if (randPower < turnPower) {
 			turnPower = randPower;
@@ -73,29 +66,29 @@ unsigned int getMinBias() {
 /* thread that handles touch and collision behavior */
 task touchThread() {
 	setSoundVolume(volume);
-	const int backupTimeRange = backupMaxTime - backupMinTime; // the time range that the robot can back up
-	while (true) {
-		while (!SensorValue[leftTouch] && !SensorValue[rightTouch]); // wait until a sensor is touched
-		wait(thedelay, milliseconds); // wait 10 milliseconds to see if other sensor is touched
 
-		respondingToTouch = true;
-		unsigned int turnTime = random(maxTravelTime - 500) + 500; // EDIT LATER
+	while (true) {
+		while (!SensorValue[touch]); // wait until a sensor is touched
+		wait(aDelay, milliseconds); // wait a bit to see if other sensor is touched
+
+		respondingToTouch = true; // signal that the robot is about to respond to touch
 
 		/* respond to collision */
 		if (SensorValue[leftTouch] && SensorValue[rightTouch]) { // both sensors touched
 			setLEDColor(ledOrange);
 			playSound(soundUpwardTones);
-			backward(random(backupTimeRange) + backupMinTime, milliseconds, speed);
+			backward(random(backTimeRange) + backMinTime, milliseconds, maxPower);
 			wait(pauseTime, seconds);
 
-
+			unsigned int turnTime = random(forwardTimeRange) + forwardMinTime;
 
 			// randomly choose to go left or right
 			if (random(1)) {
-				turnLeft(turnTime, milliseconds, speed);
+				turnLeft(turnTime, milliseconds, getRandomPower());
 			} else {
-				turnRight(turnTime, milliseconds, speed);
+				turnRight(turnTime, milliseconds, getRandomPower());
 			}
+
 			setLEDColor(ledGreen);
 
 		} else if (SensorValue[leftTouch]) { 					// left touched; turn right
@@ -115,50 +108,56 @@ task touchThread() {
 /* thread that handles the robot wandering around in a drunken sailor fashion */
 task wanderThread() {
 	srand(nSysTime);
-	long posRelativeToStart = 0; 		// represents the robot's current direction relative to its starting direction (0 = start; positive = right of start; negative = left of start)
+
+	/* Represents the robot's current direction relative to its starting direction
+	 * (0 = start; positive = right of start; negative = left of start)
+	 */
+	long posRelativeToStart = 0;
+	unsigned int leftPower, rightPower;
+	float sleepTime;
 
 	while (true) {
-		unsigned int leftPower, rightPower;
-		const float sleepTime = random(maxTravelTime);
+		sleepTime = random(forwardTimeRange) + forwardMinTime;
 
-		if (posRelativeToStart > 0) { // robot is currently left of its starting direction; try to turn right
-				displayCenteredTextLine(2, "Going left, try turn right");
+		displayCenteredTextLine(1, "Pos: %ld", posRelativeToStart); // display position relative to start position
+
+		if (posRelativeToStart > 0) { 					// robot is currently RIGHT of its starting direction; try turn left
+				displayCenteredTextLine(3, "Status: Right of Start");
 				leftPower = getMinBias();
 				rightPower = getMaxBias();
 
-		} else { // robot is currently right of or is facing its starting direction; try to turn left
+		} else { 										// robot is currently LEFT of or is facing its starting direction; try turn right
+				displayCenteredTextLine(3, "Status: Left of Start");
 				leftPower = getMaxBias();
 				rightPower = getMinBias();
-			displayCenteredTextLine(2, "Going right, try turn left");
-
 		}
 
+		posRelativeToStart += ( (leftPower - rightPower) * sleepTime ); // robot's relative pos = old pos + new pos
 
-		const long currDirection = ( (leftPower - rightPower) * sleepTime ); // robot's current direction; used for clarity
-		posRelativeToStart += currDirection;
-
-
-		displayCenteredTextLine(4, "LP: %u, RP: %u", leftPower, rightPower);
-		displayCenteredTextLine(5, "Time: %f", sleepTime);
-		displayCenteredTextLine(1, "Pos: %ld", posRelativeToStart);
+		displayCenteredTextLine(4, "LP: %u, RP: %u", leftPower, rightPower); // display both motor powers
+		displayCenteredTextLine(5, "Time: %f", sleepTime); // display the current sleep time
 
 		setMotorSpeed(leftMotor, leftPower);
 		setMotorSpeed(rightMotor, rightPower);
 
 		resetTimer(T1);
+
 		float valueOfTimer =  getTimer(T1, milliseconds); // used for clarity
 
 		while (!respondingToTouch && valueOfTimer < sleepTime) { // wait for touch thread to take over or let the timer finish
 			valueOfTimer = getTimer(T1, milliseconds);
 		}
 
+		// ************** maybe place the while loop inside an if? It'll be ugly **************************************************
 		while(respondingToTouch) { // wait for touchThread to finish
 			posRelativeToStart = 0; // reset starting direction because the robot has bumped into something
-			// (TEMPORARY: this is may be executed too many times right now, but I want to prevent turnTotal from being a global variable. However, it might have to be.)
+
 		}
+		/************************************************************************************************************************/
 	}
 }
 
+/* main thread */
 task main() {
 	startTask(wanderThread);
 	startTask(touchThread);
