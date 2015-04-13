@@ -16,16 +16,16 @@ const unsigned int aDelay = 50;							// time to see if another bumper touches (
 const unsigned int volume = 40;							// default volume for robot sound
 const unsigned int maxPower = 40;						// the robot's max power
 const unsigned int minPower = 5; 						// the robot's min power
-const unsigned int powRange = maxPower - minPower; 		// the robot's power range
-const unsigned int backMinTime = 1000;					// the min time the robot can back up (milliseconds)
-const unsigned int backMaxTime = 2000; 					// the max time the robot can back up (milliseconds)
-const unsigned int forwardMinTime = 500;				// the min time the robot can go forward (milliseconds)
-const unsigned int forwardMaxTime = 4500; 				// the max time the robot can go forward (milliseconds)
+const unsigned int powRange = maxPower - minPower; 				// the robot's power range
+const unsigned int backMinTime = 1000;						// the min time the robot can back up (milliseconds)
+const unsigned int backMaxTime = 2000; 						// the max time the robot can back up (milliseconds)
+const unsigned int forwardMinTime = 500;					// the min time the robot can go forward (milliseconds)
+const unsigned int forwardMaxTime = 4500; 					// the max time the robot can go forward (milliseconds)
 const unsigned int pauseTime = 2;						// number of seconds that the robot should pause after both sensors are touched
 const unsigned int bias = 4;							// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be.
 bool respondingToTouch = false; 						// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
 const unsigned int forwardTimeRange = forwardMaxTime - forwardMinTime; 		// time range the robot goes forward
-const unsigned int backTimeRange = backMaxTime - backMinTime; 				// time range the robot goes backward
+const unsigned int backTimeRange = backMaxTime - backMinTime; 			// time range the robot goes backward
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ////////////////////////////////////Function definitions ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
