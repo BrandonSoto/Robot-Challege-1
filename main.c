@@ -95,7 +95,7 @@ task touchThread() {
 			backward(random(backupTimeRange) + backupMinTime, milliseconds, speed);
 			turnRight(turnTime, milliseconds, speed);
 
-		} else { 												// right touched; turn left
+		} else { 								// right touched; turn left
 			backward(random(backupTimeRange) + backupMinTime, milliseconds, speed);
 			turnLeft(turnTime, milliseconds, speed);
 		}
@@ -126,7 +126,7 @@ task wanderThread() {
 				leftPower = getMinBias();
 				rightPower = getMaxBias();
 
-		} else { 										// robot is currently LEFT of or is facing its starting direction; try turn right
+		} else { 							// robot is currently LEFT of or is facing its starting direction; try turn right
 				displayCenteredTextLine(3, "Status: Left of Start");
 				leftPower = getMaxBias();
 				rightPower = getMinBias();
