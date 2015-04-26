@@ -8,26 +8,27 @@
 
 /**************************************************************
 * Title: Challenge 1
+* Version: 4/15/2015
 * Authors: Cody Tedrick & Brandon Soto
 **************************************************************/
 
 /////////////////////////////////////////// constants /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define THE_DELAY 100							// time to see if another bumper touches (milliseconds)
-#define VOLUME 30								// default volume for robot sound
-#define MAXPOWER 45								// the robot's max power
-#define MINPOWER 15 							// the robot's min power
-#define BACKUP_MINTIME 500						// the min time the robot can back up (milliseconds)
+#define THE_DELAY 100						// time to see if another bumper touches (milliseconds)
+#define VOLUME 30						// default volume for robot sound
+#define MAXPOWER 45						// the robot's max power
+#define MINPOWER 15 						// the robot's min power
+#define BACKUP_MINTIME 500					// the min time the robot can back up (milliseconds)
 #define BACKUP_MAXTIME 1500 					// the max time the robot can back up (milliseconds)
-#define FORWARD_MINTIME 500						// the min time the robot can go forward (milliseconds)
+#define FORWARD_MINTIME 500					// the min time the robot can go forward (milliseconds)
 #define FORWARD_MAXTIME 2700 					// the max time the robot can go forward (milliseconds)
-#define PAUSE_TIME 2							// number of seconds that the robot should pause after both sensors are touched
-#define BIAS 4									// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be.
-#define FORWARD_TIME_RANGE (FORWARD_MAXTIME - FORWARD_MINTIME) 			// time range the robot goes forward
-#define BACKUP_TIME_RANGE (BACKUP_MAXTIME - BACKUP_MINTIME) 			// time range the robot goes backward
-#define POWER_RANGE (MAXPOWER - MINPOWER) 								// the robot's power range
+#define PAUSE_TIME 2						// number of seconds that the robot should pause after both sensors are touched
+#define BIAS 4							// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be.
+#define FORWARD_TIME_RANGE (FORWARD_MAXTIME - FORWARD_MINTIME) 	// time range the robot goes forward
+#define BACKUP_TIME_RANGE (BACKUP_MAXTIME - BACKUP_MINTIME) 	// time range the robot goes backward
+#define POWER_RANGE (MAXPOWER - MINPOWER) 			// the robot's power range
 
 ///////////////////////////////////////////////globals ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-bool respondingToTouch = false; 						// lock that ensures multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
+bool respondingToTouch = false; // lock that ensures multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
 
 //////////////////////////////////////Function prototypes  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 unsigned int getRandomFromRange(unsigned int range, unsigned int min);
@@ -132,7 +133,7 @@ task touchThread() {
 
 				setLEDColor(ledGreen);
 
-		}	else if (SensorValue[leftTouch]) { 					// left touched; turn right
+		}	else if (SensorValue[leftTouch]) { // left touched; turn right
 			backward(turnTime, milliseconds, avgPower);
 			turnRight(turnTime, milliseconds, avgPower);
 
@@ -160,12 +161,12 @@ task wanderThread() {
 	while (true) {
 		displayCenteredTextLine(1, "Pos: %ld", posRelativeToStart); // display position relative to start position
 
-		if (posRelativeToStart > 0) { 					// robot is currently RIGHT of its starting direction; try turn left
+		if (posRelativeToStart > 0) { 			// robot is currently RIGHT of its starting direction; try turn left
 				displayCenteredTextLine(3, "Status: Right of Start");
 				leftPower = getMinBias();
 				rightPower = getMaxBias();
 
-		} else { 										// robot is currently LEFT of or is facing its starting direction; try turn right
+		} else { 					// robot is currently LEFT of or is facing its starting direction; try turn right
 				displayCenteredTextLine(3, "Status: Left of Start");
 				leftPower = getMaxBias();
 				rightPower = getMinBias();
@@ -175,7 +176,7 @@ task wanderThread() {
 		posRelativeToStart += ( (leftPower - rightPower) * sleepTime ); // robot's relative pos = old pos + new pos
 
 		displayCenteredTextLine(4, "LP: %u, RP: %u", leftPower, rightPower); 	// display both motor powers
-		displayCenteredTextLine(5, "Time: %f", sleepTime); 						// display the current sleep time
+		displayCenteredTextLine(5, "Time: %f", sleepTime); 	// display the current sleep time
 
 		setMotorSpeed(leftMotor, leftPower);
 		setMotorSpeed(rightMotor, rightPower);
