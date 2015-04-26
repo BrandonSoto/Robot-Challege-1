@@ -11,22 +11,23 @@
 * Authors: Cody Tedrick & Brandon Soto
 **************************************************************/
 
-///////////////////////////////////////////////globals//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-const unsigned int aDelay = 90;							// time to see if another bumper touches (milliseconds)
-const unsigned int volume = 30;							// default volume for robot sound
-const unsigned int maxPower = 45;						// the robot's max power
-const unsigned int minPower = 15; 						// the robot's min power
-const unsigned int backupMinTime = 500;						// the min time the robot can back up (milliseconds)
-const unsigned int backupMaxTime = 1500; 					// the max time the robot can back up (milliseconds)
-const unsigned int forwardMinTime = 500;					// the min time the robot can go forward (milliseconds)
-const unsigned int forwardMaxTime = 4500; 					// the max time the robot can go forward (milliseconds)
-const unsigned int pauseTime = 2;						// number of seconds that the robot should pause after both sensors are touched
-const unsigned int bias = 4;							// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be.
-const unsigned int forwardTimeRange = forwardMaxTime - forwardMinTime; 		// time range the robot goes forward
-const unsigned int backupTimeRange = backupMaxTime - backupMinTime; 		// time range the robot goes backward
-const unsigned int powRange = maxPower - minPower; 				// the robot's power range
-bool respondingToTouch = false; 						// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////// constants /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define THE_DELAY 100							// time to see if another bumper touches (milliseconds)
+#define VOLUME 30								// default volume for robot sound
+#define MAXPOWER 45								// the robot's max power
+#define MINPOWER 15 							// the robot's min power
+#define BACKUP_MINTIME 500						// the min time the robot can back up (milliseconds)
+#define BACKUP_MAXTIME 1500 					// the max time the robot can back up (milliseconds)
+#define FORWARD_MINTIME 500						// the min time the robot can go forward (milliseconds)
+#define FORWARD_MAXTIME 2700 					// the max time the robot can go forward (milliseconds)
+#define PAUSE_TIME 2							// number of seconds that the robot should pause after both sensors are touched
+#define BIAS 4									// the bias for the robot to move in a certain direction. The higher the number, the more influential the bias will be.
+#define FORWARD_TIME_RANGE (FORWARD_MAXTIME - FORWARD_MINTIME) 			// time range the robot goes forward
+#define BACKUP_TIME_RANGE (BACKUP_MAXTIME - BACKUP_MINTIME) 			// time range the robot goes backward
+#define POWER_RANGE (MAXPOWER - MINPOWER) 								// the robot's power range
+
+///////////////////////////////////////////////globals ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+bool respondingToTouch = false; 						// lock that ensures multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
 
 //////////////////////////////////////Function prototypes  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 unsigned int getRandomFromRange(unsigned int range, unsigned int min);
