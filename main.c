@@ -28,7 +28,27 @@ const unsigned int powRange = maxPower - minPower; 				// the robot's power rang
 bool respondingToTouch = false; 						// lock that ensures that multiple threads don't issue robot commands at same time (NOTE: only modified in touchThread)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// ////////////////////////////////////Function definitions ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////Function prototypes  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+unsigned int getRandomFromRange(unsigned int range, unsigned int min);
+unsigned int getRandomPower();
+unsigned int getRandomBackupTime();
+unsigned int getRandomForwardTime();
+unsigned int getMaxBias();
+unsigned int getMinBias();
+void performRandomTurn(unsigned int turnTime, unsigned int aPower);
+
+task touchThread();
+task wanderThread();
+
+//////////////////////////////////////Function definitions ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+/* main thread */
+task main() {
+	startTask(wanderThread);
+	startTask(touchThread);
+
+	while (true){} // allow other threads to execute}
+}
 
 /* returns a random number within a given range with min as start of range */
 unsigned int getRandomFromRange(unsigned int range, unsigned int min) {
@@ -175,10 +195,3 @@ task wanderThread() {
 	}
 }
 
-/* main thread */
-task main() {
-	startTask(wanderThread);
-	startTask(touchThread);
-
-	while (true){} // allow other threads to execute}
-}
